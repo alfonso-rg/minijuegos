@@ -12,7 +12,18 @@ import {
 const LANES = [18, 50, 82];
 const TRACK_HEIGHT = 520;
 const PLAYER_Y = 400;
-const GAME_DURATION_HINT = "Endless runner";
+
+const SPEED_PRESETS = [
+  { id: "paseo", label: "Paseo", icon: "🚶", baseSpeed: 0.6, obstacleSpeed: [2, 4], desc: "Tranquilo" },
+  { id: "normal", label: "Normal", icon: "🚴", baseSpeed: 1.0, obstacleSpeed: [4, 6], desc: "Equilibrado" },
+  { id: "rapido", label: "Rápido", icon: "⚡", baseSpeed: 1.5, obstacleSpeed: [6, 9], desc: "Para expertos" },
+];
+
+const ACCEL_PRESETS = [
+  { id: "suave", label: "Suave", icon: "🍃", rampDiv: 900, maxDiff: 2.5, desc: "Sube despacio" },
+  { id: "normal", label: "Normal", icon: "📈", rampDiv: 450, maxDiff: 4.2, desc: "Progresivo" },
+  { id: "agresiva", label: "Agresiva", icon: "🔥", rampDiv: 250, maxDiff: 6.0, desc: "Sube rápido" },
+];
 
 function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -22,7 +33,7 @@ function clamp(v, min, max) {
   return Math.max(min, Math.min(max, v));
 }
 
-function createObstacle(id, speedBoost = 0) {
+function createObstacle(id, speedBoost = 0, obstacleSpeedRange = [4, 6]) {
   const types = [
     { kind: "caja", emoji: "📦" },
     { kind: "naranjas", emoji: "🍊" },
@@ -35,12 +46,12 @@ function createObstacle(id, speedBoost = 0) {
     lane: rand(0, 2),
     y: -60,
     size: rand(34, 44),
-    speed: rand(4, 6) + speedBoost,
+    speed: rand(obstacleSpeedRange[0], obstacleSpeedRange[1]) + speedBoost,
     ...picked,
   };
 }
 
-function createBoost(id) {
+function createBoost(id, obstacleSpeedRange = [4, 6]) {
   const types = [
     { kind: "limonada", emoji: "🥤" },
     { kind: "campana", emoji: "🔔" },
@@ -52,7 +63,7 @@ function createBoost(id) {
     lane: rand(0, 2),
     y: -60,
     size: 32,
-    speed: rand(4, 6),
+    speed: rand(obstacleSpeedRange[0], obstacleSpeedRange[1]),
     ...picked,
   };
 }
@@ -108,6 +119,8 @@ function SantaCruzBackdrop({ offset }) {
 }
 
 export default function CarreraVeredaJesusRosa() {
+  const [speedPreset, setSpeedPreset] = useState(SPEED_PRESETS[1]);
+  const [accelPreset, setAccelPreset] = useState(ACCEL_PRESETS[1]);
   const [started, setStarted] = useState(false);
   const [paused, setPaused] = useState(false);
   const [lane, setLane] = useState(1);
@@ -129,6 +142,8 @@ export default function CarreraVeredaJesusRosa() {
   const jumpTimeoutRef = useRef(null);
   const distanceRef = useRef(0);
   const livesRef = useRef(3);
+  const speedRef = useRef(speedPreset);
+  const accelRef = useRef(accelPreset);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("carrera-vereda-best");
@@ -162,6 +177,8 @@ export default function CarreraVeredaJesusRosa() {
 
   const startGame = () => {
     resetGame();
+    speedRef.current = speedPreset;
+    accelRef.current = accelPreset;
     setStarted(true);
     setPaused(false);
   };
@@ -215,30 +232,32 @@ export default function CarreraVeredaJesusRosa() {
       const delta = Math.min(32, time - lastTime);
       lastTime = time;
       const diff = delta / 16.67;
-      const difficulty = Math.min(4.2, 1 + distanceRef.current / 450);
+
+      const sp = speedRef.current;
+      const ac = accelRef.current;
+      const difficulty = Math.min(ac.maxDiff, 1 + distanceRef.current / ac.rampDiv);
+      const speedMul = sp.baseSpeed * difficulty;
 
       obstacleSpawnRef.current += delta;
       boostSpawnRef.current += delta;
       invincibleRef.current = Math.max(0, invincibleRef.current - delta);
 
-      if (
-        obstacleSpawnRef.current >
-        Math.max(340, 900 - distanceRef.current)
-      ) {
+      const spawnInterval = Math.max(340, (900 / sp.baseSpeed) - distanceRef.current);
+      if (obstacleSpawnRef.current > spawnInterval) {
         obstacleSpawnRef.current = 0;
         setObstacles((prev) => [
           ...prev,
-          createObstacle(nextId.current++, difficulty),
+          createObstacle(nextId.current++, difficulty, sp.obstacleSpeed),
         ]);
       }
 
       if (boostSpawnRef.current > 2400) {
         boostSpawnRef.current = 0;
-        setBoosts((prev) => [...prev, createBoost(nextId.current++)]);
+        setBoosts((prev) => [...prev, createBoost(nextId.current++, sp.obstacleSpeed)]);
       }
 
-      setBackdropOffset((prev) => (prev + 10 * diff * difficulty) % 90);
-      setDistance((prev) => prev + 0.9 * diff * difficulty);
+      setBackdropOffset((prev) => (prev + 10 * diff * speedMul) % 90);
+      setDistance((prev) => prev + 0.9 * diff * speedMul);
 
       setObstacles((prev) =>
         prev
@@ -337,8 +356,8 @@ export default function CarreraVeredaJesusRosa() {
               </div>
             </div>
             <div className="rounded-2xl bg-black/25 p-2">
-              <div className="text-white/60">Modo</div>
-              <div className="text-lg font-bold">{GAME_DURATION_HINT}</div>
+              <div className="text-white/60">Config</div>
+              <div className="text-sm font-bold">{speedRef.current.icon} {accelRef.current.icon}</div>
             </div>
           </div>
         </div>
@@ -413,7 +432,7 @@ export default function CarreraVeredaJesusRosa() {
             )}
 
             {(!started || gameOver) && (
-              <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/65 p-6 text-center backdrop-blur-sm">
+              <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-black/65 p-4 text-center backdrop-blur-sm overflow-y-auto">
                 <div className="max-w-xs rounded-3xl border border-white/10 bg-white/10 p-5 shadow-2xl">
                   <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/20 text-emerald-200">
                     {gameOver ? <Trophy size={28} /> : <Bike size={28} />}
@@ -436,6 +455,49 @@ export default function CarreraVeredaJesusRosa() {
                       .
                     </div>
                   )}
+
+                  <div className="mt-4 text-left">
+                    <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Velocidad</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {SPEED_PRESETS.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setSpeedPreset(p)}
+                          className={`rounded-xl px-2 py-2 text-center transition ${
+                            speedPreset.id === p.id
+                              ? "bg-emerald-500 text-white shadow-lg"
+                              : "bg-white/10 text-white/70 hover:bg-white/20"
+                          }`}
+                        >
+                          <div className="text-lg">{p.icon}</div>
+                          <div className="text-xs font-bold">{p.label}</div>
+                          <div className="text-[10px] opacity-70">{p.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 text-left">
+                    <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Aceleración</p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {ACCEL_PRESETS.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => setAccelPreset(p)}
+                          className={`rounded-xl px-2 py-2 text-center transition ${
+                            accelPreset.id === p.id
+                              ? "bg-purple-500 text-white shadow-lg"
+                              : "bg-white/10 text-white/70 hover:bg-white/20"
+                          }`}
+                        >
+                          <div className="text-lg">{p.icon}</div>
+                          <div className="text-xs font-bold">{p.label}</div>
+                          <div className="text-[10px] opacity-70">{p.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <button
                     onClick={startGame}
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white shadow-lg transition hover:scale-[1.02] active:scale-[0.98]"
