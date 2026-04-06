@@ -1,6 +1,62 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Heart, Star, Lock, RefreshCw, ChevronRight, Gamepad2 } from "lucide-react";
+import { ArrowLeft, Heart, Star, Lock, RefreshCw, ChevronRight, Volume2, VolumeX } from "lucide-react";
+
+/* ══════════════════════════════════════════
+   SONIDOS — Web Audio API (sin archivos)
+══════════════════════════════════════════ */
+
+let _ac = null;
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  // Reanudar si el navegador lo suspendió
+  if (_ac.state === "suspended") _ac.resume();
+  return _ac;
+}
+
+function tone(freq, dur, type = "sine", vol = 0.25, delay = 0) {
+  try {
+    const ctx = getAC();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.connect(g);
+    g.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.value = freq;
+    const t = ctx.currentTime + delay;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  } catch (_) { /* silencioso si el navegador bloquea */ }
+}
+
+const SFX = {
+  digit:   () => tone(700, 0.055, "triangle", 0.14),
+  del:     () => tone(350, 0.055, "triangle", 0.10),
+  correct: () => {
+    tone(523,  0.08, "sine", 0.22, 0.00);   // C5
+    tone(659,  0.08, "sine", 0.22, 0.09);   // E5
+    tone(784,  0.08, "sine", 0.22, 0.18);   // G5
+    tone(1047, 0.22, "sine", 0.18, 0.27);   // C6
+  },
+  wrong: () => {
+    tone(220, 0.10, "sawtooth", 0.22, 0.00);
+    tone(165, 0.16, "sawtooth", 0.16, 0.11);
+  },
+  worldComplete: () => {
+    [523, 659, 784, 880, 1047].forEach((f, i) =>
+      tone(f, 0.11, "sine", 0.20, i * 0.09)
+    );
+    tone(1319, 0.38, "sine", 0.16, 0.50);
+  },
+  gameOver: () => {
+    [440, 330, 220, 165].forEach((f, i) =>
+      tone(f, 0.18, "sawtooth", 0.18, i * 0.14)
+    );
+  },
+};
 
 /* ══════════════════════════════════════════
    DATOS DE LOS MUNDOS
@@ -272,6 +328,18 @@ export default function DivisionAnimales() {
   };
 
   const [progress, setProgress] = useState(loadProgress);
+  const [muted, setMuted] = useState(
+    () => localStorage.getItem("divAnimales_muted") === "1"
+  );
+  const mutedRef = useRef(muted);
+  const toggleMute = () => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setMuted(next);
+    localStorage.setItem("divAnimales_muted", next ? "1" : "0");
+  };
+  const play = (sfx) => { if (!mutedRef.current) sfx(); };
+
   const [screen, setScreen] = useState("home"); // home | game | complete | over
   const [wIdx, setWIdx] = useState(0);
   const [problem, setProblem] = useState(null);
@@ -317,6 +385,7 @@ export default function DivisionAnimales() {
   const advance = () => {
     const nextIdx = probIdx + 1;
     if (nextIdx >= N_PROBLEMS) {
+      play(SFX.worldComplete);
       const stars = calcStars(totalWrong);
       const newStars = [...progress.stars];
       newStars[wIdx] = Math.max(newStars[wIdx], stars);
@@ -342,10 +411,12 @@ export default function DivisionAnimales() {
     if (!input || feedback) return;
     const val = parseInt(input, 10);
     if (val === problem.answer) {
+      play(SFX.correct);
       setFeedback("correct");
       setSolved(true);
       setTimeout(advance, 2200);
     } else {
+      play(SFX.wrong);
       const nw = wrongThis + 1;
       const nl = lives - 1;
       setWrongThis(nw);
@@ -353,7 +424,7 @@ export default function DivisionAnimales() {
       setFeedback("wrong");
       setLives(nl);
       if (nl <= 0) {
-        setTimeout(() => setScreen("over"), 1500);
+        setTimeout(() => { play(SFX.gameOver); setScreen("over"); }, 1500);
       } else {
         setTimeout(() => {
           setFeedback(null);
@@ -365,11 +436,13 @@ export default function DivisionAnimales() {
 
   const handleDigit = (d) => {
     if (feedback || input.length >= 3) return;
+    play(SFX.digit);
     setInput((prev) => prev + String(d));
   };
 
   const handleDel = () => {
     if (feedback) return;
+    play(SFX.del);
     setInput((prev) => prev.slice(0, -1));
   };
 
@@ -391,11 +464,18 @@ export default function DivisionAnimales() {
               Aprende divisiones con el reino animal
             </p>
           </div>
-          <div className="flex items-center gap-1.5 bg-yellow-500/15 rounded-xl px-3 py-1.5">
-            <Star size={15} className="text-yellow-400 fill-yellow-400" />
-            <span className="text-yellow-300 font-bold text-sm">
-              {totalStars}
-            </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMute}
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors"
+              title={muted ? "Activar sonido" : "Silenciar"}
+            >
+              {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            </button>
+            <div className="flex items-center gap-1.5 bg-yellow-500/15 rounded-xl px-3 py-1.5">
+              <Star size={15} className="text-yellow-400 fill-yellow-400" />
+              <span className="text-yellow-300 font-bold text-sm">{totalStars}</span>
+            </div>
           </div>
         </div>
 
@@ -596,7 +676,16 @@ export default function DivisionAnimales() {
             ))}
           </div>
         </div>
-        <Hearts count={lives} />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleMute}
+            className="p-2 rounded-xl bg-white/10"
+            title={muted ? "Activar sonido" : "Silenciar"}
+          >
+            {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+          </button>
+          <Hearts count={lives} />
+        </div>
       </div>
 
       {/* Cuerpo */}
