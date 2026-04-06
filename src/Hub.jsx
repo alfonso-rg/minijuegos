@@ -46,11 +46,11 @@ const games = [
     id: "dibujos-san-benito",
     title: "Dibujos San Benito",
     description:
-      "¡Colorea y dibuja con los personajes de San Benito! Una experiencia creativa para los más pequeños.",
+      "Colorea online los dibujos de las lecturas de cada domingo. Elige el domingo, pinta con la paleta de colores y guarda tu obra. También incluye oraciones. Hecho para la parroquia San Benito de Murcia.",
     icon: <Paintbrush size={32} />,
     href: "https://dibujos-san-benito.netlify.app/",
     color: "from-pink-500 to-fuchsia-700",
-    tags: ["Arte", "Creatividad", "Niños"],
+    tags: ["Colorear", "Religioso", "Parroquia", "Niños"],
   },
 ];
 
