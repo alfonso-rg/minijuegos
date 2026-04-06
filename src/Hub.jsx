@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2, Divide, Globe2, Calculator } from "lucide-react";
+import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush } from "lucide-react";
 
 const games = [
   {
@@ -41,6 +41,16 @@ const games = [
     href: "https://matemaventura.netlify.app/",
     color: "from-orange-500 to-rose-700",
     tags: ["Matemáticas", "Educativo", "Aventura"],
+  },
+  {
+    id: "dibujos-san-benito",
+    title: "Dibujos San Benito",
+    description:
+      "¡Colorea y dibuja con los personajes de San Benito! Una experiencia creativa para los más pequeños.",
+    icon: <Paintbrush size={32} />,
+    href: "https://dibujos-san-benito.netlify.app/",
+    color: "from-pink-500 to-fuchsia-700",
+    tags: ["Arte", "Creatividad", "Niños"],
   },
 ];
 
