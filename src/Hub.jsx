@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2, Divide, Globe2 } from "lucide-react";
+import { Bike, Gamepad2, Divide, Globe2, Calculator } from "lucide-react";
 
 const games = [
   {
@@ -32,6 +32,16 @@ const games = [
     color: "from-indigo-500 to-purple-700",
     tags: ["Geografía", "Educativo", "Móvil", "7+ años"],
   },
+  {
+    id: "mateaventura",
+    title: "MateAventura",
+    description:
+      "¡Embárcate en una aventura matemática! Practica sumas, restas, multiplicaciones y divisiones con retos progresivos y divertidos.",
+    icon: <Calculator size={32} />,
+    href: "https://matemaventura.netlify.app/",
+    color: "from-orange-500 to-rose-700",
+    tags: ["Matemáticas", "Educativo", "Aventura"],
+  },
 ];
 
 export default function Hub() {
@@ -51,34 +61,49 @@ export default function Hub() {
         </header>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          {games.map((game) => (
-            <Link
-              key={game.id}
-              to={game.path}
-              className="group rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl transition hover:border-white/20 hover:bg-white/10 hover:shadow-2xl"
-            >
-              <div
-                className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${game.color} text-white shadow-lg`}
+          {games.map((game) => {
+            const cardClass =
+              "group rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl transition hover:border-white/20 hover:bg-white/10 hover:shadow-2xl";
+            const cardContent = (
+              <>
+                <div
+                  className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${game.color} text-white shadow-lg`}
+                >
+                  {game.icon}
+                </div>
+                <h2 className="text-xl font-bold">{game.title}</h2>
+                <p className="mt-2 text-sm text-white/60">{game.description}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {game.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-4 text-sm font-semibold text-purple-400 transition group-hover:text-purple-300">
+                  Jugar &rarr;
+                </div>
+              </>
+            );
+            return game.href ? (
+              <a
+                key={game.id}
+                href={game.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cardClass}
               >
-                {game.icon}
-              </div>
-              <h2 className="text-xl font-bold">{game.title}</h2>
-              <p className="mt-2 text-sm text-white/60">{game.description}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {game.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/70"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-4 text-sm font-semibold text-purple-400 transition group-hover:text-purple-300">
-                Jugar &rarr;
-              </div>
-            </Link>
-          ))}
+                {cardContent}
+              </a>
+            ) : (
+              <Link key={game.id} to={game.path} className={cardClass}>
+                {cardContent}
+              </Link>
+            );
+          })}
 
           <div className="flex items-center justify-center rounded-3xl border border-dashed border-white/10 p-6 text-white/30">
             <div className="text-center">
