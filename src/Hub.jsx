@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2, Divide } from "lucide-react";
+import { Bike, Gamepad2, Divide, Globe2 } from "lucide-react";
 
 const games = [
   {
@@ -21,6 +21,16 @@ const games = [
     path: "/division-animales",
     color: "from-cyan-500 to-blue-700",
     tags: ["Matemáticas", "Educativo", "Móvil", "6-10 años"],
+  },
+  {
+    id: "capitales-del-mundo",
+    title: "Capitales del Mundo",
+    description:
+      "¡Sube al cohete y viaja por el planeta! Adivina las capitales de Europa, Américas y el Mundo. 3 mundos desbloqueables, racha de aciertos y sonidos.",
+    icon: <Globe2 size={32} />,
+    path: "/capitales-del-mundo",
+    color: "from-indigo-500 to-purple-700",
+    tags: ["Geografía", "Educativo", "Móvil", "7+ años"],
   },
 ];
 
