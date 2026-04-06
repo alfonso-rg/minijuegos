@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2 } from "lucide-react";
+import { Bike, Gamepad2, Divide } from "lucide-react";
 
 const games = [
   {
@@ -11,6 +11,16 @@ const games = [
     path: "/carrera-vereda",
     color: "from-emerald-500 to-emerald-700",
     tags: ["Arcade", "Endless Runner", "Móvil"],
+  },
+  {
+    id: "division-animales",
+    title: "División Animal",
+    description:
+      "¡Aprende a dividir con el reino animal! Reparte peces, reptiles, mamíferos, aves e invertebrados en grupos iguales. 5 mundos con dificultad progresiva.",
+    icon: <Divide size={32} />,
+    path: "/division-animales",
+    color: "from-cyan-500 to-blue-700",
+    tags: ["Matemáticas", "Educativo", "Móvil", "6-10 años"],
   },
 ];
 
