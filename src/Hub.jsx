@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush } from "lucide-react";
+import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush, Brain } from "lucide-react";
 
 const games = [
   {
@@ -21,6 +21,16 @@ const games = [
     path: "/division-animales",
     color: "from-cyan-500 to-blue-700",
     tags: ["Matemáticas", "Educativo", "Móvil", "6-10 años"],
+  },
+  {
+    id: "trivial-game",
+    title: "Trivial Mania",
+    description:
+      "¡Pon a prueba tu conocimiento! Geografía, Historia, Espectáculos, Deportes, Lengua y Ciencias. 3 niveles de dificultad (Básico, Medio, Avanzado), partidas de 10 o 20 preguntas, racha de aciertos y ranking online.",
+    icon: <Brain size={32} />,
+    path: "/trivial-game",
+    color: "from-violet-500 to-purple-700",
+    tags: ["Trivial", "Cultura general", "Multijugador", "Todos los públicos"],
   },
   {
     id: "capitales-del-mundo",
