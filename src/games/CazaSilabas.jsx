@@ -177,6 +177,7 @@ const SFX = {
 export default function CazaSilabas() {
   const [screen, setScreen] = useState("home");
   const [difficultyId, setDifficultyId] = useState("facil");
+  const [onlyImageMode, setOnlyImageMode] = useState(false);
   const [roundWords, setRoundWords] = useState([]);
   const [roundIndex, setRoundIndex] = useState(0);
   const [options, setOptions] = useState([]);
@@ -366,6 +367,21 @@ export default function CazaSilabas() {
               <span className="rounded-full bg-white/15 px-3 py-1">Con sonidos</span>
               <span className="rounded-full bg-white/15 px-3 py-1">Optimizado móvil</span>
             </div>
+            <div className="mt-4 rounded-2xl border border-white/15 bg-black/20 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-200">Opción de juego</p>
+              <button
+                type="button"
+                onClick={() => setOnlyImageMode((v) => !v)}
+                className="mt-2 inline-flex items-center rounded-full bg-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/20"
+              >
+                {onlyImageMode ? "🖼️ Solo imagen (ON)" : "🔤 Imagen + palabra (ON)"}
+              </button>
+              <p className="mt-2 text-xs text-white/70">
+                {onlyImageMode
+                  ? "En partida no se mostrará la palabra escrita, solo la imagen."
+                  : "En partida verás imagen y palabra escrita."}
+              </p>
+            </div>
           </header>
 
           <section className="grid gap-4 sm:grid-cols-3">
@@ -472,8 +488,16 @@ export default function CazaSilabas() {
 
         <article className="rounded-3xl border border-white/15 bg-white/10 p-4 text-center sm:p-6">
           <p className="text-4xl sm:text-6xl">{currentWord?.emoji ?? "🔤"}</p>
-          <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-4xl">{currentWord?.text ?? "palabra"}</h2>
-          <p className="mt-2 text-sm text-white/85">Toca las sílabas en orden correcto.</p>
+          {onlyImageMode ? (
+            <h2 className="mt-1 text-xl font-black tracking-tight text-cyan-100 sm:text-3xl">
+              Adivina la palabra solo con la imagen
+            </h2>
+          ) : (
+            <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-4xl">{currentWord?.text ?? "palabra"}</h2>
+          )}
+          <p className="mt-2 text-sm text-white/85">
+            {onlyImageMode ? "Pista visual: toca sílabas en el orden correcto." : "Toca las sílabas en orden correcto."}
+          </p>
           <button
             type="button"
             onClick={pronounceWord}
