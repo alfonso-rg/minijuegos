@@ -4,6 +4,8 @@ import CarreraVeredaJesusRosa from "./games/CarreraVeredaJesusRosa";
 import DivisionAnimales from "./games/DivisionAnimales";
 import CapitalesDelMundo from "./games/CapitalesDelMundo";
 import TrivialGame from "./games/TrivialGame";
+import ReaccionEnCadena from "./games/ReaccionEnCadena";
+import CazaSilabas from "./games/CazaSilabas";
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
         <Route path="/division-animales" element={<DivisionAnimales />} />
         <Route path="/capitales-del-mundo" element={<CapitalesDelMundo />} />
         <Route path="/trivial-game" element={<TrivialGame />} />
+        <Route path="/reaccion-en-cadena" element={<ReaccionEnCadena />} />
+        <Route path="/caza-silabas" element={<CazaSilabas />} />
       </Routes>
     </BrowserRouter>
   );
