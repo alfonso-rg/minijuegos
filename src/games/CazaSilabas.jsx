@@ -207,6 +207,29 @@ const DISTRACTORS = [
   "po", "pe", "pi", "pa", "cho", "cha", "lle", "gua", "blio", "lec",
 ];
 
+const BRIEF_DEFINITIONS = {
+  casa: "Lugar donde vive una familia.",
+  mesa: "Mueble donde comemos o trabajamos.",
+  gato: "Animal doméstico que maúlla.",
+  pato: "Ave que nada en el agua.",
+  luna: "Satélite que vemos de noche.",
+  pera: "Fruta dulce de color verde o amarilla.",
+  boca: "Parte de la cara para hablar y comer.",
+  mano: "Parte del cuerpo con cinco dedos.",
+  sopa: "Comida líquida que se toma caliente.",
+  vaca: "Animal de granja que da leche.",
+  nube: "Vapor de agua en el cielo.",
+  camino: "Ruta para ir de un lugar a otro.",
+  banana: "Fruta amarilla y alargada.",
+  cohete: "Vehículo que vuela al espacio.",
+  mochila: "Bolsa para llevar libros y cosas.",
+  bicicleta: "Vehículo de dos ruedas con pedales.",
+  mariposa: "Insecto de alas de colores.",
+  dinosaurio: "Animal gigante que vivió hace millones de años.",
+  biblioteca: "Lugar donde hay muchos libros.",
+  elefante: "Animal grande con trompa.",
+};
+
 function shuffle(arr) {
   const next = [...arr];
   for (let i = next.length - 1; i > 0; i -= 1) {
@@ -232,6 +255,11 @@ function createOptions(word) {
 
 function getWorldId(difficulty, onlyImageMode) {
   return onlyImageMode ? difficulty.worldIdHidden : difficulty.worldIdVisible;
+}
+
+function getBriefDefinition(word) {
+  if (!word) return "";
+  return BRIEF_DEFINITIONS[word.text] ?? `Pista: palabra de ${word.syllables.length} sílabas relacionada con la imagen.`;
 }
 
 async function fetchRankings(worldId) {
@@ -324,6 +352,7 @@ export default function CazaSilabas() {
   );
 
   const currentWord = roundWords[roundIndex];
+  const currentDefinition = getBriefDefinition(currentWord);
 
   const play = useCallback((name) => {
     if (!mutedRef.current) SFX[name]?.();
@@ -608,9 +637,12 @@ export default function CazaSilabas() {
         <article className="rounded-3xl border border-white/15 bg-white/10 p-4 text-center sm:p-6">
           <p className="text-4xl sm:text-6xl">{currentWord?.emoji ?? "🔤"}</p>
           {onlyImageMode ? (
-            <h2 className="mt-1 text-xl font-black tracking-tight text-cyan-100 sm:text-3xl">
-              Adivina la palabra solo con la imagen
-            </h2>
+            <>
+              <h2 className="mt-1 text-xl font-black tracking-tight text-cyan-100 sm:text-3xl">
+                Adivina la palabra solo con la imagen
+              </h2>
+              <p className="mt-2 text-sm text-cyan-100/90 sm:text-base">{currentDefinition}</p>
+            </>
           ) : (
             <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-4xl">{currentWord?.text ?? "palabra"}</h2>
           )}
