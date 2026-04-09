@@ -20,7 +20,8 @@ const DIFFICULTIES = [
     timeLimit: 90,
     rounds: 8,
     pointsPerWord: 10,
-    worldId: "cazasilabas_facil",
+    worldIdVisible: "cazasilabas_facil",
+    worldIdHidden: "cazasilabas_facil_oculta",
     gradient: "from-emerald-500 to-teal-600",
   },
   {
@@ -30,7 +31,8 @@ const DIFFICULTIES = [
     timeLimit: 75,
     rounds: 10,
     pointsPerWord: 12,
-    worldId: "cazasilabas_medio",
+    worldIdVisible: "cazasilabas_medio",
+    worldIdHidden: "cazasilabas_medio_oculta",
     gradient: "from-indigo-500 to-violet-700",
   },
   {
@@ -40,7 +42,8 @@ const DIFFICULTIES = [
     timeLimit: 65,
     rounds: 12,
     pointsPerWord: 15,
-    worldId: "cazasilabas_dificil",
+    worldIdVisible: "cazasilabas_dificil",
+    worldIdHidden: "cazasilabas_dificil_oculta",
     gradient: "from-fuchsia-500 to-rose-700",
   },
 ];
@@ -119,6 +122,10 @@ function createOptions(word) {
   return shuffle([...base, ...extra]);
 }
 
+function getWorldId(difficulty, onlyImageMode) {
+  return onlyImageMode ? difficulty.worldIdHidden : difficulty.worldIdVisible;
+}
+
 async function fetchRankings(worldId) {
   const query = `${SUPA_URL}/rest/v1/scores?world_id=eq.${worldId}&select=player_name,score,time_seconds,created_at&order=score.desc,time_seconds.asc&limit=10`;
   const res = await fetch(query, { headers: SUPA_HEADERS });
@@ -193,6 +200,7 @@ export default function CazaSilabas() {
   const [saved, setSaved] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [hofDifficultyId, setHofDifficultyId] = useState("facil");
+  const [hofOnlyImageMode, setHofOnlyImageMode] = useState(false);
 
   const mutedRef = useRef(false);
   const timerRef = useRef(null);
@@ -334,13 +342,14 @@ export default function CazaSilabas() {
     const name = playerName.trim();
     if (!name) return;
     setSaving(true);
-    const ok = await saveScore(difficulty.worldId, name, score, elapsed);
+    const ok = await saveScore(getWorldId(difficulty, onlyImageMode), name, score, elapsed);
     setSaved(ok);
     setSaving(false);
   };
 
-  const openHof = (id) => {
+  const openHof = (id, nextOnlyImageMode = onlyImageMode) => {
     setHofDifficultyId(id);
+    setHofOnlyImageMode(nextOnlyImageMode);
     setScreen("hof");
   };
 
@@ -440,6 +449,7 @@ export default function CazaSilabas() {
     return (
       <RankingScreen
         difficulty={DIFFICULTIES.find((d) => d.id === hofDifficultyId) ?? DIFFICULTIES[0]}
+        onlyImageMode={hofOnlyImageMode}
         onBack={() => setScreen("home")}
       />
     );
@@ -461,7 +471,8 @@ export default function CazaSilabas() {
         hasSupa={HAS_SUPA}
         onPlayAgain={() => startGame(difficulty.id)}
         onHome={() => setScreen("home")}
-        onOpenRanking={() => openHof(difficulty.id)}
+        onlyImageMode={onlyImageMode}
+        onOpenRanking={() => openHof(difficulty.id, onlyImageMode)}
       />
     );
   }
@@ -559,6 +570,7 @@ export default function CazaSilabas() {
 
 function ResultScreen({
   difficulty,
+  onlyImageMode,
   score,
   hits,
   total,
@@ -583,7 +595,9 @@ function ResultScreen({
 
         {hasSupa ? (
           <div className="mt-6 rounded-2xl bg-black/25 p-4 text-left">
-            <p className="text-sm font-semibold text-amber-200">Guardar en ranking ({difficulty.title})</p>
+            <p className="text-sm font-semibold text-amber-200">
+              Guardar en ranking ({difficulty.title} · {onlyImageMode ? "Solo imagen" : "Imagen + palabra"})
+            </p>
             <input
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
@@ -622,7 +636,7 @@ function ResultScreen({
   );
 }
 
-function RankingScreen({ difficulty, onBack }) {
+function RankingScreen({ difficulty, onlyImageMode, onBack }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -637,7 +651,7 @@ function RankingScreen({ difficulty, onBack }) {
       setLoading(true);
       setError(false);
       try {
-        const data = await fetchRankings(difficulty.worldId);
+        const data = await fetchRankings(getWorldId(difficulty, onlyImageMode));
         if (!cancelled) setRows(data ?? []);
       } catch {
         if (!cancelled) setError(true);
@@ -649,7 +663,7 @@ function RankingScreen({ difficulty, onBack }) {
     return () => {
       cancelled = true;
     };
-  }, [difficulty.worldId]);
+  }, [difficulty, onlyImageMode]);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950 p-4 text-white sm:p-8">
@@ -657,7 +671,9 @@ function RankingScreen({ difficulty, onBack }) {
         <div className="mb-4 flex items-center justify-between gap-2">
           <div>
             <p className="text-sm text-cyan-200">Ranking independiente</p>
-            <h2 className="text-2xl font-black">Caza Sílabas · {difficulty.title}</h2>
+            <h2 className="text-2xl font-black">
+              Caza Sílabas · {difficulty.title} · {onlyImageMode ? "Solo imagen" : "Imagen + palabra"}
+            </h2>
           </div>
           <Trophy className="text-amber-300" size={28} />
         </div>
