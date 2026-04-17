@@ -23,6 +23,16 @@ const games = [
     tags: ["Matemáticas", "Educativo", "Móvil", "6-10 años"],
   },
   {
+    id: "caza-silabas",
+    title: "Caza Sílabas",
+    description:
+      "Juego educativo para 7 años: forma palabras tocando sílabas en orden. Incluye sonidos, 3 dificultades y ranking online independiente por nivel.",
+    icon: <SpellCheck size={32} />,
+    path: "/caza-silabas",
+    color: "from-cyan-500 to-sky-700",
+    tags: ["Lengua", "Educativo", "7 años", "Ranking"],
+  },
+  {
     id: "reaccion-en-cadena",
     title: "Reacción en cadena",
     description:
