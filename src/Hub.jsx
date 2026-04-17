@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush, Brain, Target, Ship } from "lucide-react";
+import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush, Brain, Target, Ship, SpellCheck } from "lucide-react";
 
 const games = [
   {

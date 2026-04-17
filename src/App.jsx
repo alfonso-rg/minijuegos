@@ -6,6 +6,7 @@ import CapitalesDelMundo from "./games/CapitalesDelMundo";
 import TrivialGame from "./games/TrivialGame";
 import ReaccionEnCadena from "./games/ReaccionEnCadena";
 import OrtoPirata from "./games/OrtoPirata";
+import CazaSilabas from "./games/CazaSilabas";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/trivial-game" element={<TrivialGame />} />
         <Route path="/reaccion-en-cadena" element={<ReaccionEnCadena />} />
         <Route path="/orto-pirata" element={<OrtoPirata />} />
+        <Route path="/caza-silabas" element={<CazaSilabas />} />
       </Routes>
     </BrowserRouter>
   );
