@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush, Brain, Target } from "lucide-react";
+import { Bike, Gamepad2, Divide, Globe2, Calculator, Paintbrush, Brain, Target, Ship } from "lucide-react";
 
 const games = [
   {
@@ -41,6 +41,16 @@ const games = [
     path: "/trivial-game",
     color: "from-violet-500 to-purple-700",
     tags: ["Trivial", "Cultura general", "Multijugador", "Todos los públicos"],
+  },
+  {
+    id: "orto-pirata",
+    title: "Orto-Pirata",
+    description:
+      "¡Surca los mares corrigiendo mensajes en botella! 5 islas con reglas ortográficas (B/V, H muda, tildes, G/J, LL/Y). Dispara a la palabra bien escrita antes de que los tiburones te alcancen.",
+    icon: <Ship size={32} />,
+    path: "/orto-pirata",
+    color: "from-sky-500 to-blue-800",
+    tags: ["Lengua", "Ortografía", "Educativo", "Móvil", "7+ años"],
   },
   {
     id: "capitales-del-mundo",
